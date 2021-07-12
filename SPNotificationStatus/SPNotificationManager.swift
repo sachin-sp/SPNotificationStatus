@@ -13,7 +13,7 @@ public class SPNotificationManager: NSObject {
     public static let shared = SPNotificationManager()
     private override init() {}
         
-    public func showNotification(isUserInteractionDisabled: Bool = false, notificationImageName name: String = "notificationImagePlaceholder", notificationTilte title: String = "Title", notificationDetail detail: String = "Detail") {
+    public func showNotification(isUserInteractionDisabled: Bool = false, notificationImageName name: String = "notificationImagePlaceholder", notificationTilte title: String = "Title", notificationDetail detail: String = "Detail", showOkButton: Bool = false) {
         
         guard let window = UIApplication.shared.windows.first else { print("SPNotificationManagerError: failed to get: UIApplication.shared.windows.first")
             return
@@ -31,8 +31,8 @@ public class SPNotificationManager: NSObject {
         }
         
         if !isNotificationAleardyAdded {
-            let notificationView = SPNotificationView(frame: window.bounds)
-            notificationView.isUserInteractionDisabled = isUserInteractionDisabled
+            let notificationView = SPNotificationView(frame: window.bounds, showOkButton: showOkButton)
+            notificationView.isUserInteractionDisabled = showOkButton
             firsView.addSubview(notificationView)
             notificationView.set(notificationImageName: name, notificationTitle: title, notificationDetail: detail)
         } else {

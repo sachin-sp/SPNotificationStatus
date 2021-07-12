@@ -14,12 +14,20 @@ class SPNotificationView: UIView {
     private var visualEffectView: UIVisualEffectView!
     private var notificationImageView: UIImageView!
     private var notificationTitleLabel: UILabel!
+    private var okButton: UIButton!
     
     var timer: Timer?
     var isUserInteractionDisabled = false
+    var isOkButtonEnabled = false
 
-    public override init(frame: CGRect) {
+    /*public override init(frame: CGRect) {
         super.init(frame: frame)
+        setUpView()
+    }*/
+    
+    init(frame: CGRect, showOkButton: Bool) {
+        super.init(frame: frame)
+        self.isOkButtonEnabled = showOkButton
         setUpView()
     }
     
@@ -41,20 +49,62 @@ class SPNotificationView: UIView {
         visualEffectView.topAnchor.constraint(equalTo: self.topAnchor, constant: 30).isActive = true
         visualEffectView.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -20).isActive = true
         visualEffectView.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 20).isActive = true
-        visualEffectView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        
         
         self.notificationImageView = UIImageView()
+        self.notificationImageView.translatesAutoresizingMaskIntoConstraints = false
         visualEffectView.contentView.addSubview(notificationImageView)
         self.notificationTitleLabel = UILabel()
+        self.notificationTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         visualEffectView.contentView.addSubview(notificationTitleLabel)
         
         //Contraints
     
-        visualEffectView.contentView.addConstraintsWithFormat("H:|-10-[v0(100)]-8-[v1]-10-|", views: notificationImageView, notificationTitleLabel)
         
+        if isOkButtonEnabled {
+            
+            self.okButton = UIButton(type: .system)
+            self.okButton.addTarget(self, action: #selector(removeSelf), for: .touchUpInside)
+            self.okButton.layer.cornerRadius = 5
+            self.okButton.backgroundColor = .white
+            self.okButton.translatesAutoresizingMaskIntoConstraints = false
+            self.visualEffectView.contentView.addSubview(okButton)
+            self.okButton.setTitle("OK", for: .normal)
+            self.okButton.titleLabel?.font = UIFont.systemFont(ofSize: 21, weight: .semibold)
+            
+            visualEffectView.heightAnchor.constraint(equalToConstant: 160).isActive = true
+            
+            notificationImageView.leftAnchor.constraint(equalTo: visualEffectView.contentView.leftAnchor, constant: 10).isActive = true
+            notificationImageView.topAnchor.constraint(equalTo: visualEffectView.contentView.topAnchor, constant: 30).isActive = true
+            notificationImageView.widthAnchor.constraint(equalToConstant: 100).isActive = true
+            notificationImageView.bottomAnchor.constraint(equalTo: visualEffectView.contentView.bottomAnchor, constant: -30).isActive = true
+            
+            notificationTitleLabel.topAnchor.constraint(equalTo: visualEffectView.contentView.topAnchor, constant: 10).isActive = true
+            notificationTitleLabel.leftAnchor.constraint(equalTo: notificationImageView.rightAnchor, constant: 8).isActive = true
+            notificationTitleLabel.rightAnchor.constraint(equalTo: visualEffectView.contentView.rightAnchor, constant: -10).isActive = true
+            notificationTitleLabel.bottomAnchor.constraint(equalTo: okButton.topAnchor, constant: -10).isActive = true
+            
+            okButton.centerXAnchor.constraint(equalTo: visualEffectView.contentView.centerXAnchor, constant: 0).isActive = true
+            okButton.bottomAnchor.constraint(equalTo: visualEffectView.contentView.bottomAnchor, constant: -10).isActive = true
+            okButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            okButton.widthAnchor.constraint(equalToConstant: 200).isActive = true
+            
+            
+        } else {
+            
+            visualEffectView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+            
+            notificationImageView.leftAnchor.constraint(equalTo: visualEffectView.contentView.leftAnchor, constant: 10).isActive = true
+            notificationImageView.topAnchor.constraint(equalTo: visualEffectView.contentView.topAnchor, constant: 0).isActive = true
+            notificationImageView.widthAnchor.constraint(equalToConstant: 100).isActive = true
+            notificationImageView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+            
+            notificationTitleLabel.topAnchor.constraint(equalTo: visualEffectView.contentView.topAnchor, constant: 10).isActive = true
+            notificationTitleLabel.leftAnchor.constraint(equalTo: notificationImageView.rightAnchor, constant: 8).isActive = true
+            notificationTitleLabel.rightAnchor.constraint(equalTo: visualEffectView.contentView.rightAnchor, constant: -10).isActive = true
+            notificationTitleLabel.bottomAnchor.constraint(equalTo: visualEffectView.contentView.bottomAnchor, constant: -10).isActive = true
+        }
         
-        visualEffectView.contentView.addConstraintsWithFormat("V:|[v0]|", views: notificationImageView)
-        visualEffectView.contentView.addConstraintsWithFormat("V:|-10-[v0]-10-|", views: notificationTitleLabel)
         
         self.notificationTitleLabel.numberOfLines = 0
         
@@ -78,7 +128,10 @@ class SPNotificationView: UIView {
             self.contentView.alpha = 1.0
             self.contentView.transform = CGAffineTransform.identity
         }) { _ in
-            self.timer = Timer.scheduledTimer(timeInterval: TimeInterval(3.0), target: self, selector: #selector(self.removeSelf), userInfo: nil, repeats: false)
+            if !(self.isOkButtonEnabled) {
+                self.timer = Timer.scheduledTimer(timeInterval: TimeInterval(3.0), target: self, selector: #selector(self.removeSelf), userInfo: nil, repeats: false)
+            }
+            
         }
     }
     
@@ -106,7 +159,7 @@ class SPNotificationView: UIView {
         let attributedStr = NSMutableAttributedString()
         
         let titleStr = getAttributedString(text: title, attributes: [.font: UIFont.systemFont(ofSize: 17, weight: .heavy), .foregroundColor: UIColor.darkText])
-        let detailStr = getAttributedString(text: detail, attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .medium), .foregroundColor: UIColor.darkText])
+        let detailStr = getAttributedString(text: detail, attributes: [.font: UIFont.systemFont(ofSize: 17, weight: .regular), .foregroundColor: UIColor.darkText])
         
         attributedStr.append(titleStr)
         attributedStr.append(NSAttributedString(string: "\n"))
@@ -128,6 +181,7 @@ class SPNotificationView: UIView {
         self.notificationImageView.image = UIImage(named: name)
         let attributedStr = attributedText(title: title, detail: detail)
         self.notificationTitleLabel.attributedText = attributedStr
+        
     }
     
     deinit {
@@ -135,6 +189,7 @@ class SPNotificationView: UIView {
         self.visualEffectView = nil
         self.notificationImageView = nil
         self.notificationTitleLabel = nil
+        self.okButton = nil
         self.timer?.invalidate()
         self.timer = nil
     }
